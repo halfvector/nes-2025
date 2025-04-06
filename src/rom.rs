@@ -68,8 +68,12 @@ impl RomHeader {
         (self.control_byte1 & 0b0000_0100) != 0
     }
 
-    // We could add methods for other flags (like mapper number) later if needed.
-    // pub fn mapper_number(&self) -> u8 { ... }
+    /// Calculates the iNES mapper number from control bytes 1 and 2.
+    /// Mapper ID = Upper nibble of Control Byte 2 | Lower nibble of Mapper ID (from upper nibble of CB1)
+    pub fn mapper_id(&self) -> u8 {
+        // Standard calculation: (Upper nibble CB2) | (Upper nibble CB1 shifted down)
+        (self.control_byte2 & 0xF0) | (self.control_byte1 >> 4)
+    }
 }
 
 impl fmt::Display for RomHeader {
@@ -85,6 +89,7 @@ impl fmt::Display for RomHeader {
         write!(f, "  Mirroring: {:?}\n", self.mirroring())?;
         write!(f, "  Battery RAM: {}\n", self.has_battery_backed_ram())?;
         write!(f, "  Trainer Present: {}\n", self.has_trainer())?;
+        write!(f, "  Mapper ID: {}\n", self.mapper_id())?; // Add mapper ID to display
         // Indicate success
         Ok(())
     }
